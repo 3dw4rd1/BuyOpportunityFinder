@@ -1,0 +1,48 @@
+# =============================================================================
+# ETF TRACKER — GitHub Actions Workflow
+# =============================================================================
+# This file tells GitHub to automatically run your ETF tracker every morning.
+#
+# 6:00 AM NZT = 6:00 PM UTC (during NZST, UTC+13 in summer)
+#               7:00 PM UTC (during NZDT, UTC+12 in winter... actually NZ is
+#               UTC+12 standard and UTC+13 daylight)
+#
+# NZ Standard Time (NZST) = UTC+12  → 6am = 18:00 UTC
+# NZ Daylight Time (NZDT) = UTC+13  → 6am = 17:00 UTC
+#
+# We use 17:00 UTC to ensure it always runs by 6am NZT across both seasons.
+# On NZST days it'll arrive ~5am, on NZDT days exactly 6am. Safe either way.
+
+name: Daily ETF Report
+
+on:
+  schedule:
+    - cron: "0 17 * * 1-5"   # Runs at 17:00 UTC, Monday–Friday only
+                               # (no point running on weekends — markets are closed)
+  workflow_dispatch:           # This lets you trigger it manually too — handy for testing!
+
+jobs:
+  run-etf-tracker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out your code from GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Step 3: Install dependencies (yfinance, requests)
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Step 4: Run the tracker!
+      # Your NTFY_TOPIC is stored as a GitHub Secret — see setup instructions.
+      - name: Run ETF tracker
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python main.py
