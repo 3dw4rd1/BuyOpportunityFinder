@@ -24,9 +24,9 @@ def format_message(analysis: dict) -> tuple[str, str]:
 
     title_parts = []
     if gains:
-        title_parts.append(f"📈 {len(gains)} up")
+        title_parts.append(f"{len(gains)} up")
     if losses:
-        title_parts.append(f"📉 {len(losses)} down")
+        title_parts.append(f"{len(losses)} down")
 
     title = f"ETF Alert {today} - " + ", ".join(title_parts)
 
