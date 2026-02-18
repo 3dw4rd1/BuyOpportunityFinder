@@ -28,10 +28,10 @@ def format_message(analysis: dict) -> tuple[str, str]:
     if losses:
         title_parts.append(f"📉 {len(losses)} down")
 
-    title = f"ETF Alert {today} — " + ", ".join(title_parts)
+    title = f"ETF Alert {today} - " + ", ".join(title_parts)
 
     # --- Body ---
-    lines = [f"Moves ≥ {ALERT_THRESHOLD_PCT}% detected:\n"]
+    lines = [f"Moves >= {ALERT_THRESHOLD_PCT}% detected:\n"]
 
     for m in movers:
         sign = "+" if m["pct_change"] > 0 else ""
