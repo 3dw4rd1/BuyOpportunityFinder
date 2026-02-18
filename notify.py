@@ -72,7 +72,7 @@ def send_notification(analysis: dict) -> bool:
             },
         )
 
-        if response.status_code == 200:
+        if response.ok:
             print(f"✅ Notification sent successfully to {NTFY_URL}")
             return True
         else:

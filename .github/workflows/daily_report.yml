@@ -14,7 +14,6 @@ name: Daily ETF Report
 on:
   schedule:
     - cron: "0 17 * * 1-5"   # Runs at 17:00 UTC, Monday-Friday only
-    - cron: "0 1 * * 2-6"  
                                # (no point running on weekends - markets are closed)
   workflow_dispatch:           # This lets you trigger it manually too - handy for testing!
 
