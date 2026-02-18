@@ -18,18 +18,25 @@ ALERT_THRESHOLD_PCT = 3.0
 
 # --- Your ETF watchlist ---
 # Format: "TICKER": "Friendly name you want to see in notifications"
+#
+# NOTE ON NZX FUNDS: Alpha Vantage (our free data source) doesn't support
+# NZX tickers. Instead we track the underlying US ETFs that the SmartShares
+# funds invest in — the % price moves are essentially identical, which is
+# all we need for buy/sell signals.
 WATCHLIST = {
-    # US-listed ETFs (NYSE Arca)
+    # Your original US-listed picks
     "VDE":  "Vanguard Energy Index",
     "PHO":  "Invesco Water Resources",
     "AAAU": "Goldman Sachs Physical Gold",
     "GLTR": "Aberdeen Physical Precious Metals",
 
-    # NZX-listed SmartShares ETFs
-    "TWH.NZ": "SmartShares Total World (NZD Hedged)",
-    "EMF.NZ": "SmartShares Emerging Markets",
-    "ASR.NZ": "SmartShares Australian Resources",
-    "ASD.NZ": "SmartShares Australian Dividend",
-    "USF.NZ": "SmartShares US500",
-    "GLD.NZ": "SmartShares Gold ETF",
+    # SmartShares NZX funds tracked via their underlying US ETF equivalents:
+    "VT":   "SmartShares Total World [via VT]",       # TWH tracks Vanguard Total World (VT)
+    "VWO":  "SmartShares Emerging Markets [via VWO]", # EMF tracks Vanguard FTSE Emerging Markets (VWO)
+    "VOO":  "SmartShares US500 [via VOO]",            # USF tracks Vanguard S&P 500 (VOO)
+    "GLD":  "SmartShares Gold ETF [via GLD]",         # GLD.NZ tracks gold price, same as SPDR GLD
+
+    # Australian funds — tracked via ASX-listed ETFs using ASX: prefix
+    "ASX:MVR": "SmartShares Australian Resources [via MVR]",  # VanEck ASX Resources ETF
+    "ASX:VHY": "SmartShares Australian Dividend [via VHY]",   # Vanguard Australian Dividend ETF
 }
