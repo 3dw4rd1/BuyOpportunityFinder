@@ -70,6 +70,10 @@ def fetch_prices():
                 # Retry once
                 response = requests.get(BASE_URL, params=params, timeout=15)
                 data = response.json()
+                if "Information" in data or "Error Message" in data:
+                    print(f"  ❌  {name} ({ticker}): Still rate limited after retry — skipping")
+                    results[ticker] = None
+                    continue
 
             time_series = data.get("Time Series (Daily)", {})
 

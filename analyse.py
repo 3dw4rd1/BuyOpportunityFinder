@@ -2,7 +2,7 @@
 # ETF TRACKER — ANALYSER
 # =============================================================================
 # Takes the raw price data and works out what moved, by how much,
-# and whether it crossed your 3% alert threshold.
+# and whether it crossed your alert threshold.
 
 from config import ALERT_THRESHOLD_PCT
 

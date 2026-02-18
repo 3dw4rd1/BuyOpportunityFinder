@@ -14,7 +14,7 @@ def main():
     print("  ETF TRACKER — Daily Report")
     print("=" * 50)
 
-    # Step 1: Fetch latest prices from Yahoo Finance
+    # Step 1: Fetch latest prices from Alpha Vantage
     print("\n[1/3] Fetching prices...")
     prices = fetch_prices()
 
