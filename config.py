@@ -14,7 +14,7 @@ NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
 
 # --- Alert threshold ---
 # A notification will only be sent if at least one ETF moves by this amount.
-ALERT_THRESHOLD_PCT = 3.0
+ALERT_THRESHOLD_PCT = 4.0
 
 # --- Your ETF watchlist ---
 # Format: "TICKER": "Friendly name you want to see in notifications"
