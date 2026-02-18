@@ -36,7 +36,7 @@ WATCHLIST = {
     "VOO":  "SmartShares US500 [via VOO]",            # USF tracks Vanguard S&P 500 (VOO)
     "GLD":  "SmartShares Gold ETF [via GLD]",         # GLD.NZ tracks gold price, same as SPDR GLD
 
-    # Australian funds — tracked via ASX-listed ETFs using ASX: prefix
-    "ASX:MVR": "SmartShares Australian Resources [via MVR]",  # VanEck ASX Resources ETF
-    "ASX:VHY": "SmartShares Australian Dividend [via VHY]",   # Vanguard Australian Dividend ETF
+    # Australian funds — tracked via US-listed proxies (ASX not supported on free tier)
+    "XME":  "SmartShares AU Resources [via XME]",  # SPDR Metals & Mining ETF — closely tracks ASX resources
+    "DVY":  "SmartShares AU Dividend [via DVY]",   # iShares Dividend Select ETF — similar dividend focus
 }
