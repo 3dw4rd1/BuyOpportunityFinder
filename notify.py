@@ -125,6 +125,10 @@ def send_pe_notification(pe_analysis: dict) -> bool:
     if skipped:
         lines.append(f"⚪ No P/E data: {', '.join(skipped)}")
 
+    note = pe_analysis.get("note")
+    if note:
+        lines.append(f"\n({note})")
+
     body = "\n".join(lines)
 
     print(f"\n--- P/E Notification Preview ---")

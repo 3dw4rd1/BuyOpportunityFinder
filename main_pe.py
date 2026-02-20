@@ -17,13 +17,14 @@ def main():
     print("  ETF TRACKER — P/E Ratio Report")
     print("=" * 50)
 
-    # Step 1: Fetch P/E ratios from Alpha Vantage
+    # Step 1: Fetch P/E ratios for today's rotation group
     print("\n[1/3] Fetching P/E ratios...")
-    pe_data = fetch_pe_ratios()
+    pe_data, rotation_note = fetch_pe_ratios()
 
     # Step 2: Classify each ETF as above or below the threshold
     print("\n[2/3] Analysing P/E ratios...")
     pe_analysis = analyse_pe(pe_data)
+    pe_analysis["note"] = rotation_note  # passed through to the notification
 
     tracked = len(pe_analysis["all"])
     skipped = len(pe_analysis["skipped"])

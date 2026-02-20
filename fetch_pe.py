@@ -6,34 +6,70 @@
 #
 # Commodity ETFs (AAAU, GLTR, GLD) are deliberately excluded — physical metal
 # holders have no earnings, so P/E is not applicable.
+#
+# ROTATION STRATEGY (Option A):
+# Rather than checking all 9 ETFs every day, PE_WATCHLIST is split into 3
+# interleaved groups of 3. Each day rotates to the next group based on the
+# day-of-year. This keeps the daily request count at 20 (prices) + 3 (P/E) = 23,
+# well within Alpha Vantage's free tier of 25/day.
+# Each ETF is checked every 3 weekdays — more than frequent enough given that
+# P/E is driven by quarterly earnings data and changes slowly.
 
 import requests
 import time
 import os
+from datetime import date
 from config import PE_WATCHLIST
 
 # Same API key as the price fetcher — stored as a GitHub Secret
 API_KEY = os.environ.get("ALPHA_VANTAGE_KEY", "demo")
 BASE_URL = "https://www.alphavantage.co/query"
 
+_TOTAL_GROUPS = 3
+
+
+def _todays_watchlist() -> tuple[dict, int]:
+    """
+    Returns (watchlist_subset, group_number) for today's rotation.
+
+    Splits PE_WATCHLIST into 3 interleaved groups using day-of-year % 3:
+      Group 1 (indices 0, 3, 6): VOO, DVY, XME
+      Group 2 (indices 1, 4, 7): VT,  VDE, EFA
+      Group 3 (indices 2, 5, 8): VWO, PHO, QQQ
+    """
+    all_items = list(PE_WATCHLIST.items())
+    group_idx = date.today().timetuple().tm_yday % _TOTAL_GROUPS
+    subset = dict(all_items[group_idx::_TOTAL_GROUPS])
+    group_num = group_idx + 1
+    return subset, group_num
+
 
 def fetch_pe_ratios():
     """
-    Fetches the current P/E ratio for each ticker in PE_WATCHLIST
+    Fetches the current P/E ratio for today's rotating group of ETFs
     using Alpha Vantage's OVERVIEW endpoint.
 
-    Returns a dict like:
-    {
-        "VOO": {"name": "S&P 500", "pe_ratio": 26.5},
-        "VWO": None,   # if P/E data wasn't available
-        ...
-    }
+    Returns a tuple of:
+      - dict: { "VOO": {"name": "S&P 500", "pe_ratio": 26.5}, "VWO": None, ... }
+      - str:  rotation note for the notification (e.g. "Group 2/3 — ...")
     """
+    todays_tickers, group_num = _todays_watchlist()
+    rotation_note = (
+        f"Group {group_num}/{_TOTAL_GROUPS} — rotating daily "
+        f"(full cycle every {_TOTAL_GROUPS} weekdays)"
+    )
+
     results = {}
 
-    print(f"Fetching P/E ratios for {len(PE_WATCHLIST)} ETFs via Alpha Vantage...")
+    print(f"P/E rotation: {rotation_note}")
+    print(
+        f"Today's ETFs: {', '.join(todays_tickers.keys())}  "
+        f"(API budget: 20 price + {len(todays_tickers)} P/E = "
+        f"{20 + len(todays_tickers)}/25)"
+    )
+    print(f"\nFetching P/E ratios for {len(todays_tickers)} ETFs via Alpha Vantage...")
 
-    for i, (ticker, name) in enumerate(PE_WATCHLIST.items()):
+    for i, (ticker, name) in enumerate(todays_tickers.items()):
         try:
             params = {
                 "function": "OVERVIEW",
@@ -85,12 +121,13 @@ def fetch_pe_ratios():
             results[ticker] = None
 
         # Alpha Vantage free tier: 5 requests/minute — 13s delay keeps us safe
-        if i < len(PE_WATCHLIST) - 1:
+        if i < len(todays_tickers) - 1:
             time.sleep(13)
 
-    return results
+    return results, rotation_note
 
 
 if __name__ == "__main__":
-    ratios = fetch_pe_ratios()
-    print("\nRaw results:", ratios)
+    ratios, note = fetch_pe_ratios()
+    print(f"\nRotation note: {note}")
+    print("Raw results:", ratios)

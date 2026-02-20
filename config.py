@@ -28,10 +28,9 @@ PE_ALERT_THRESHOLD = 23.0
 # coverage: developed ex-US markets and US tech/growth respectively.
 #
 # NOTE ON API REQUESTS: Alpha Vantage free tier allows 25 requests/day.
-# Price checks run twice daily (2 × 10 = 20 requests). The P/E workflow
-# runs once daily (9 requests). Combined = 29/day — slightly over the free
-# limit. If you hit rate limits, consider upgrading your API key or reducing
-# the PE_WATCHLIST to 5 ETFs.
+# Price checks: 2 runs × 10 ETFs = 20 requests/day.
+# P/E checks use a 3-day rotation (3 ETFs/day): 20 + 3 = 23 requests/day ✓
+# Full P/E cycle completes every 3 weekdays. See fetch_pe.py for group details.
 PE_WATCHLIST = {
     "VOO": "S&P 500",
     "VT":  "Vanguard Total World",
