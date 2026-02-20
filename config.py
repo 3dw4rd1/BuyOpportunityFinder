@@ -16,6 +16,33 @@ NTFY_URL = f"https://ntfy.sh/{NTFY_TOPIC}"
 # A notification will only be sent if at least one ETF moves by this amount.
 ALERT_THRESHOLD_PCT = 4.0
 
+# --- P/E ratio alert threshold ---
+# A notification is sent daily showing which ETFs are above or below this value.
+# Above = potentially expensive, below = potential buy opportunity.
+PE_ALERT_THRESHOLD = 23.0
+
+# --- P/E watchlist ---
+# Equity ETFs only — commodity ETFs (AAAU, GLTR, GLD) are excluded because
+# physical metal holders have no earnings and therefore no P/E ratio.
+# EFA and QQQ are added here (not in the price watchlist) to give broader
+# coverage: developed ex-US markets and US tech/growth respectively.
+#
+# NOTE ON API REQUESTS: Alpha Vantage free tier allows 25 requests/day.
+# Price checks: 2 runs × 10 ETFs = 20 requests/day.
+# P/E checks use a 3-day rotation (3 ETFs/day): 20 + 3 = 23 requests/day ✓
+# Full P/E cycle completes every 3 weekdays. See fetch_pe.py for group details.
+PE_WATCHLIST = {
+    "VOO": "S&P 500",
+    "VT":  "Vanguard Total World",
+    "VWO": "Vanguard Emerging Markets",
+    "DVY": "iShares Dividend Select",
+    "VDE": "Vanguard Energy Index",
+    "PHO": "Invesco Water Resources",
+    "XME": "SPDR Metals & Mining",
+    "EFA": "iShares MSCI EAFE",          # Developed markets ex-US (Europe, Japan, Australia)
+    "QQQ": "Invesco Nasdaq-100",          # US tech/growth — highest P/E of major indices
+}
+
 # --- Your ETF watchlist ---
 # Format: "TICKER": "Friendly name you want to see in notifications"
 #
