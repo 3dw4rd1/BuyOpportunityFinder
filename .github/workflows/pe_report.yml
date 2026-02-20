@@ -1,0 +1,44 @@
+# =============================================================================
+# ETF TRACKER — P/E Ratio Report Workflow
+# =============================================================================
+# Runs once daily (morning NZT) to check P/E ratios against the threshold
+# and send a push notification via Ntfy.
+#
+# Kept separate from the price workflow (daily_report.yml) so each can run
+# on its own schedule without interfering.
+#
+# API request budget (Alpha Vantage free tier = 25 requests/day):
+#   Price workflow: 2 runs × 10 ETFs = 20 requests
+#   This workflow:  1 run  ×  9 ETFs =  9 requests
+#   Total: 29/day — slightly over the free tier limit.
+#   If you hit rate limits, reduce PE_WATCHLIST in config.py to 5 ETFs,
+#   or upgrade your Alpha Vantage plan.
+
+name: Daily P/E Ratio Report
+
+on:
+  schedule:
+    - cron: "0 18 * * 1-5"   # 7am NZT (UTC+13) — once daily, Monday-Friday
+  workflow_dispatch:           # Manual trigger for testing
+
+jobs:
+  run-pe-tracker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run P/E ratio tracker
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+        run: python main_pe.py

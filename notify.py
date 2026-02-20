@@ -6,7 +6,7 @@
 
 import requests
 from datetime import date
-from config import NTFY_URL, ALERT_THRESHOLD_PCT
+from config import NTFY_URL, ALERT_THRESHOLD_PCT, PE_ALERT_THRESHOLD
 
 
 def format_message(analysis: dict) -> tuple[str, str]:
@@ -81,6 +81,77 @@ def send_notification(analysis: dict) -> bool:
 
     except requests.exceptions.RequestException as e:
         print(f"❌ Failed to send notification: {e}")
+        return False
+
+
+def send_pe_notification(pe_analysis: dict) -> bool:
+    """
+    Sends a push notification with the daily P/E ratio status for all tracked ETFs.
+    ETFs above the threshold are flagged as expensive; below as potential buys.
+    Returns True if sent successfully, False otherwise.
+    """
+    if not pe_analysis["has_alert"]:
+        print("No P/E data available. No notification sent.")
+        return False
+
+    today = date.today().strftime("%d %b %Y")
+    above = pe_analysis["above"]
+    below = pe_analysis["below"]
+    skipped = pe_analysis["skipped"]
+
+    # --- Title ---
+    parts = []
+    if above:
+        parts.append(f"{len(above)} above")
+    if below:
+        parts.append(f"{len(below)} below")
+    title = f"P/E Alert {today} — " + ", ".join(parts) + f" ({PE_ALERT_THRESHOLD})"
+
+    # --- Body ---
+    lines = [f"P/E threshold: {PE_ALERT_THRESHOLD}\n"]
+
+    if above:
+        lines.append("🔴 Above threshold (expensive):")
+        for m in above:
+            lines.append(f"   {m['name']} ({m['ticker']}): {m['pe_ratio']}")
+        lines.append("")
+
+    if below:
+        lines.append("🟢 Below threshold (potential buy):")
+        for m in below:
+            lines.append(f"   {m['name']} ({m['ticker']}): {m['pe_ratio']}")
+        lines.append("")
+
+    if skipped:
+        lines.append(f"⚪ No P/E data: {', '.join(skipped)}")
+
+    body = "\n".join(lines)
+
+    print(f"\n--- P/E Notification Preview ---")
+    print(f"Title: {title}")
+    print(f"Body:\n{body}")
+    print(f"--------------------------------\n")
+
+    try:
+        response = requests.post(
+            NTFY_URL,
+            data=body.encode("utf-8"),
+            headers={
+                "Title": title,
+                "Priority": "default",
+                "Tags": "bar_chart,moneybag",
+            },
+        )
+
+        if response.ok:
+            print(f"✅ P/E notification sent successfully to {NTFY_URL}")
+            return True
+        else:
+            print(f"❌ Ntfy returned status {response.status_code}: {response.text}")
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Failed to send P/E notification: {e}")
         return False
 
 
