@@ -84,9 +84,8 @@ def fetch_pe_ratios():
             if "Error Message" in data:
                 print(f"  ❌  {name} ({ticker}): Ticker not found — {data['Error Message']}")
                 results[ticker] = None
-                continue
 
-            if "Information" in data:
+            elif "Information" in data:
                 # Rate limit hit — wait and retry once
                 print(f"  ⚠️  Rate limit hit. Waiting 60 seconds...")
                 time.sleep(60)
@@ -95,22 +94,30 @@ def fetch_pe_ratios():
                 if "Information" in data or "Error Message" in data:
                     print(f"  ❌  {name} ({ticker}): Still rate limited after retry — skipping")
                     results[ticker] = None
-                    continue
+                else:
+                    pe_raw = data.get("PERatio", "None")
+                    if not pe_raw or pe_raw in ("None", "-", "0"):
+                        print(f"  ⚠️  {name} ({ticker}): P/E ratio not available")
+                        results[ticker] = None
+                    else:
+                        pe_ratio = round(float(pe_raw), 2)
+                        results[ticker] = {"name": name, "pe_ratio": pe_ratio}
+                        print(f"  ✅  {name} ({ticker}): P/E = {pe_ratio}")
 
-            pe_raw = data.get("PERatio", "None")
+            else:
+                pe_raw = data.get("PERatio", "None")
 
-            # Alpha Vantage returns "None" (string) when the field isn't available
-            if not pe_raw or pe_raw in ("None", "-", "0"):
-                print(f"  ⚠️  {name} ({ticker}): P/E ratio not available")
-                results[ticker] = None
-                continue
-
-            pe_ratio = round(float(pe_raw), 2)
-            results[ticker] = {
-                "name": name,
-                "pe_ratio": pe_ratio,
-            }
-            print(f"  ✅  {name} ({ticker}): P/E = {pe_ratio}")
+                # Alpha Vantage returns "None" (string) when the field isn't available
+                if not pe_raw or pe_raw in ("None", "-", "0"):
+                    print(f"  ⚠️  {name} ({ticker}): P/E ratio not available")
+                    results[ticker] = None
+                else:
+                    pe_ratio = round(float(pe_raw), 2)
+                    results[ticker] = {
+                        "name": name,
+                        "pe_ratio": pe_ratio,
+                    }
+                    print(f"  ✅  {name} ({ticker}): P/E = {pe_ratio}")
 
         except (ValueError, TypeError) as e:
             print(f"  ⚠️  {name} ({ticker}): Could not parse P/E ratio — {e}")
@@ -120,7 +127,9 @@ def fetch_pe_ratios():
             print(f"  ❌  {name} ({ticker}): Failed — {e}")
             results[ticker] = None
 
-        # Alpha Vantage free tier: 5 requests/minute — 13s delay keeps us safe
+        # Alpha Vantage free tier: 5 requests/minute — 13s delay keeps us safe.
+        # This must run for every ticker (not just successful ones) to avoid
+        # firing the next request immediately after a skip, which causes rate limits.
         if i < len(todays_tickers) - 1:
             time.sleep(13)
 
