@@ -1,63 +1,40 @@
 # =============================================================================
 # ETF TRACKER — P/E RATIO FETCHER
 # =============================================================================
-# Uses EODHD's Fundamentals API to retrieve the current trailing P/E ratio
-# for each equity ETF in PE_WATCHLIST.
+# Uses Yahoo Finance (via yfinance) to retrieve the current trailing P/E ratio
+# for each ETF in PE_WATCHLIST.
 #
-# All 9 ETFs are checked every day — no rotation required because EODHD
-# does not impose the same tight daily request caps as Alpha Vantage's
-# free tier.
-#
-# Commodity ETFs (AAAU, GLTR, GLD) are deliberately excluded — physical metal
-# holders have no earnings, so P/E is not applicable.
+# All 10 ETFs are checked every day. Commodity ETFs (AAAU, GLTR, GLD) do not
+# have earnings, so Yahoo Finance returns no P/E for them — they are logged as
+# skipped rather than treated as errors.
 
-import requests
+import yfinance as yf
 import time
-import os
 from config import PE_WATCHLIST
-
-API_KEY = os.environ.get("EODHD_API_KEY", "demo")
-BASE_URL = "https://eodhd.com/api/fundamentals"
 
 
 def fetch_pe_ratios():
     """
     Fetches the current trailing P/E ratio for every ETF in PE_WATCHLIST
-    using the EODHD Fundamentals API.
+    using Yahoo Finance.
 
     Returns a tuple of:
-      - dict: { "VOO": {"name": "S&P 500", "pe_ratio": 26.5}, "VWO": None, ... }
+      - dict: { "VOO": {"name": "S&P 500", "pe_ratio": 26.5}, "AAAU": None, ... }
       - str:  data-source note for the notification
     """
-    note = f"All {len(PE_WATCHLIST)} ETFs checked daily via EODHD Fundamentals API"
+    note = f"All {len(PE_WATCHLIST)} ETFs checked daily via Yahoo Finance"
     results = {}
 
-    print(f"Fetching P/E ratios for {len(PE_WATCHLIST)} ETFs via EODHD...")
+    print(f"Fetching P/E ratios for {len(PE_WATCHLIST)} ETFs via Yahoo Finance...")
 
     for i, (ticker, name) in enumerate(PE_WATCHLIST.items()):
-        eodhd_ticker = f"{ticker}.US"
-        url = f"{BASE_URL}/{eodhd_ticker}"
-
         try:
-            response = requests.get(
-                url,
-                params={"api_token": API_KEY, "fmt": "json"},
-                timeout=15,
-            )
-            response.raise_for_status()
-            data = response.json()
+            stock = yf.Ticker(ticker)
+            info = stock.info
 
-            # EODHD returns an empty dict or error message when the ticker is unknown
-            if not data or "General" not in data:
-                print(f"  ❌  {name} ({ticker}): No data returned by EODHD")
-                results[ticker] = None
-                continue
+            pe_raw = info.get("trailingPE")
 
-            valuation = data.get("Valuation", {})
-            pe_raw = valuation.get("TrailingPE")
-
-            # EODHD uses None, "N/A", 0, or "" when the field isn't available
-            if pe_raw is None or pe_raw in ("N/A", "", "0", 0):
+            if pe_raw is None or pe_raw == 0:
                 print(f"  ⚠️  {name} ({ticker}): Trailing P/E not available")
                 results[ticker] = None
                 continue
@@ -73,15 +50,11 @@ def fetch_pe_ratios():
             print(f"  ⚠️  {name} ({ticker}): Could not parse P/E ratio — {e}")
             results[ticker] = None
 
-        except requests.exceptions.HTTPError as e:
-            print(f"  ❌  {name} ({ticker}): HTTP error — {e}")
-            results[ticker] = None
-
         except Exception as e:
             print(f"  ❌  {name} ({ticker}): Failed — {e}")
             results[ticker] = None
 
-        # Small delay between requests to be a good API citizen
+        # Small delay between requests to avoid rate limiting
         if i < len(PE_WATCHLIST) - 1:
             time.sleep(1)
 
