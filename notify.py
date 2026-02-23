@@ -105,7 +105,7 @@ def send_pe_notification(pe_analysis: dict) -> bool:
         parts.append(f"{len(above)} above")
     if below:
         parts.append(f"{len(below)} below")
-    title = f"P/E Alert {today} — " + ", ".join(parts) + f" ({PE_ALERT_THRESHOLD})"
+    title = f"P/E Alert {today} - " + ", ".join(parts) + f" ({PE_ALERT_THRESHOLD})"
 
     # --- Body ---
     lines = [f"P/E threshold: {PE_ALERT_THRESHOLD}\n"]
