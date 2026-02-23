@@ -7,8 +7,8 @@
 # Kept separate from the price workflow (daily_report.yml) so each can run
 # on its own schedule without interfering.
 #
-# P/E data is sourced from the EODHD Fundamentals API (EODHD_API_KEY secret).
-# All 9 ETFs in PE_WATCHLIST are checked in a single daily run.
+# P/E data is sourced from Yahoo Finance (via yfinance).
+# All 10 ETFs in PE_WATCHLIST are checked in a single daily run.
 
 name: Daily P/E Ratio Report
 
@@ -36,5 +36,4 @@ jobs:
       - name: Run P/E ratio tracker
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          EODHD_API_KEY: ${{ secrets.EODHD_API_KEY }}
         run: python main_pe.py

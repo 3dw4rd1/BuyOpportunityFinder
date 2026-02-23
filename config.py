@@ -22,22 +22,20 @@ ALERT_THRESHOLD_PCT = 4.0
 PE_ALERT_THRESHOLD = 23.0
 
 # --- P/E watchlist ---
-# Equity ETFs only — commodity ETFs (AAAU, GLTR, GLD) are excluded because
-# physical metal holders have no earnings and therefore no P/E ratio.
-# EFA and QQQ are added here (not in the price watchlist) to give broader
-# coverage: developed ex-US markets and US tech/growth respectively.
-#
-# P/E data is sourced from EODHD Fundamentals API (all 9 ETFs checked daily).
+# Matches the 10 ETFs in WATCHLIST. P/E data is sourced from Yahoo Finance.
+# Commodity ETFs (AAAU, GLTR, GLD) have no earnings and will be reported as
+# skipped — Yahoo Finance returns no trailing P/E for physical metal holders.
 PE_WATCHLIST = {
-    "VOO": "S&P 500",
-    "VT":  "Vanguard Total World",
-    "VWO": "Vanguard Emerging Markets",
-    "DVY": "iShares Dividend Select",
-    "VDE": "Vanguard Energy Index",
-    "PHO": "Invesco Water Resources",
-    "XME": "SPDR Metals & Mining",
-    "EFA": "iShares MSCI EAFE",          # Developed markets ex-US (Europe, Japan, Australia)
-    "QQQ": "Invesco Nasdaq-100",          # US tech/growth — highest P/E of major indices
+    "VDE":  "Vanguard Energy Index",
+    "PHO":  "Invesco Water Resources",
+    "AAAU": "Goldman Sachs Physical Gold",        # commodity — no P/E
+    "GLTR": "Aberdeen Physical Precious Metals",  # commodity — no P/E
+    "VT":   "Vanguard Total World",
+    "VWO":  "Vanguard Emerging Markets",
+    "VOO":  "S&P 500",
+    "GLD":  "SPDR Gold Shares",                   # commodity — no P/E
+    "XME":  "SPDR Metals & Mining",
+    "DVY":  "iShares Dividend Select",
 }
 
 # --- Your ETF watchlist ---
