@@ -7,12 +7,8 @@
 # Kept separate from the price workflow (daily_report.yml) so each can run
 # on its own schedule without interfering.
 #
-# API request budget (Alpha Vantage free tier = 25 requests/day):
-#   Price workflow: 2 runs × 10 ETFs = 20 requests
-#   This workflow:  1 run  ×  9 ETFs =  9 requests
-#   Total: 29/day — slightly over the free tier limit.
-#   If you hit rate limits, reduce PE_WATCHLIST in config.py to 5 ETFs,
-#   or upgrade your Alpha Vantage plan.
+# P/E data is sourced from the EODHD Fundamentals API (EODHD_API_KEY secret).
+# All 9 ETFs in PE_WATCHLIST are checked in a single daily run.
 
 name: Daily P/E Ratio Report
 
@@ -40,5 +36,5 @@ jobs:
       - name: Run P/E ratio tracker
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+          EODHD_API_KEY: ${{ secrets.EODHD_API_KEY }}
         run: python main_pe.py

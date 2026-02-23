@@ -27,10 +27,7 @@ PE_ALERT_THRESHOLD = 23.0
 # EFA and QQQ are added here (not in the price watchlist) to give broader
 # coverage: developed ex-US markets and US tech/growth respectively.
 #
-# NOTE ON API REQUESTS: Alpha Vantage free tier allows 25 requests/day.
-# Price checks: 2 runs × 10 ETFs = 20 requests/day.
-# P/E checks use a 3-day rotation (3 ETFs/day): 20 + 3 = 23 requests/day ✓
-# Full P/E cycle completes every 3 weekdays. See fetch_pe.py for group details.
+# P/E data is sourced from EODHD Fundamentals API (all 9 ETFs checked daily).
 PE_WATCHLIST = {
     "VOO": "S&P 500",
     "VT":  "Vanguard Total World",
