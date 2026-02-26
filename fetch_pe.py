@@ -2,32 +2,48 @@
 # ETF TRACKER — P/E RATIO FETCHER
 # =============================================================================
 # Uses Yahoo Finance (via yfinance) to retrieve the current trailing P/E ratio
-# for each ETF in PE_WATCHLIST.
+# for a rotating group of ETFs from PE_WATCHLIST.
 #
-# All 10 ETFs are checked every day. Commodity ETFs (AAAU, GLTR, GLD) do not
-# have earnings, so Yahoo Finance returns no P/E for them — they are logged as
-# skipped rather than treated as errors.
+# 20 ETFs are rotated in groups of 3 by day-of-year to stay within API limits.
 
 import yfinance as yf
 import time
+from datetime import date
 from config import PE_WATCHLIST
 
 
 def fetch_pe_ratios():
     """
-    Fetches the current trailing P/E ratio for every ETF in PE_WATCHLIST
-    using Yahoo Finance.
+    Fetches the current trailing P/E ratio for a rotating group of ETFs
+    from PE_WATCHLIST using Yahoo Finance.
 
     Returns a tuple of:
-      - dict: { "VOO": {"name": "S&P 500", "pe_ratio": 26.5}, "AAAU": None, ... }
+      - dict: { "VOO": {"name": "S&P 500", "pe_ratio": 26.5}, ... }
       - str:  data-source note for the notification
     """
-    note = f"All {len(PE_WATCHLIST)} ETFs checked daily via Yahoo Finance"
+    tickers = list(PE_WATCHLIST.items())
+    total = len(tickers)
+    group_size = 3
+
+    day_index = date.today().timetuple().tm_yday
+    start = (day_index * group_size) % total
+    group = tickers[start:start + group_size]
+
+    # Handle wrap-around if group crosses end of list
+    if len(group) < group_size:
+        group += tickers[:group_size - len(group)]
+
+    note = (
+        f"Showing {group_size} of {total} ETFs "
+        f"(rotation {start // group_size + 1} of {-(-total // group_size)}) "
+        f"— full cycle every ~{-(-total // group_size)} weekdays"
+    )
+
     results = {}
 
-    print(f"Fetching P/E ratios for {len(PE_WATCHLIST)} ETFs via Yahoo Finance...")
+    print(f"Fetching P/E ratios for {group_size} of {total} ETFs via Yahoo Finance...")
 
-    for i, (ticker, name) in enumerate(PE_WATCHLIST.items()):
+    for i, (ticker, name) in enumerate(group):
         try:
             stock = yf.Ticker(ticker)
             info = stock.info
@@ -55,7 +71,7 @@ def fetch_pe_ratios():
             results[ticker] = None
 
         # Small delay between requests to avoid rate limiting
-        if i < len(PE_WATCHLIST) - 1:
+        if i < len(group) - 1:
             time.sleep(1)
 
     return results, note

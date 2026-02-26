@@ -22,20 +22,28 @@ ALERT_THRESHOLD_PCT = 4.0
 PE_ALERT_THRESHOLD = 23.0
 
 # --- P/E watchlist ---
-# Matches the 10 ETFs in WATCHLIST. P/E data is sourced from Yahoo Finance.
-# Commodity ETFs (AAAU, GLTR, GLD) have no earnings and will be reported as
-# skipped — Yahoo Finance returns no trailing P/E for physical metal holders.
+# 20 ETFs rotated in groups of 3 by day-of-year. P/E data sourced from Yahoo Finance.
 PE_WATCHLIST = {
+    "VOO":  "S&P 500",
+    "VT":   "Vanguard Total World",
+    "VUG":  "Vanguard Growth ETF",
+    "QQQ":  "Invesco Nasdaq-100",
+    "VWO":  "Vanguard Emerging Markets",
+    "EFA":  "iShares MSCI EAFE (Developed ex-US)",
+    "EWA":  "iShares MSCI Australia",
+    "EWJ":  "iShares MSCI Japan",
+    "EZU":  "iShares MSCI Eurozone",
+    "INDA": "iShares MSCI India",
+    "FXI":  "iShares China Large-Cap",
     "VDE":  "Vanguard Energy Index",
     "PHO":  "Invesco Water Resources",
-    "AAAU": "Goldman Sachs Physical Gold",        # commodity — no P/E
-    "GLTR": "Aberdeen Physical Precious Metals",  # commodity — no P/E
-    "VT":   "Vanguard Total World",
-    "VWO":  "Vanguard Emerging Markets",
-    "VOO":  "S&P 500",
-    "GLD":  "SPDR Gold Shares",                   # commodity — no P/E
-    "XME":  "SPDR Metals & Mining",
     "DVY":  "iShares Dividend Select",
+    "XME":  "SPDR Metals & Mining",
+    "VNQ":  "Vanguard Real Estate ETF",
+    "IYH":  "iShares US Healthcare ETF",
+    "XLF":  "Financial Select SPDR",
+    "XLI":  "Industrial Select SPDR",
+    "XLY":  "Consumer Discretionary Select SPDR",
 }
 
 # --- Your ETF watchlist ---
@@ -46,19 +54,29 @@ PE_WATCHLIST = {
 # funds invest in — the % price moves are essentially identical, which is
 # all we need for buy/sell signals.
 WATCHLIST = {
-    # Your original US-listed picks
     "VDE":  "Vanguard Energy Index",
     "PHO":  "Invesco Water Resources",
     "AAAU": "Goldman Sachs Physical Gold",
     "GLTR": "Aberdeen Physical Precious Metals",
-
-    # SmartShares NZX funds tracked via their underlying US ETF equivalents:
-    "VT":   "SmartShares Total World [via VT]",       # TWH tracks Vanguard Total World (VT)
-    "VWO":  "SmartShares Emerging Markets [via VWO]", # EMF tracks Vanguard FTSE Emerging Markets (VWO)
-    "VOO":  "SmartShares US500 [via VOO]",            # USF tracks Vanguard S&P 500 (VOO)
-    "GLD":  "SmartShares Gold ETF [via GLD]",         # GLD.NZ tracks gold price, same as SPDR GLD
-
-    # Australian funds — tracked via US-listed proxies (ASX not supported on free tier)
-    "XME":  "SmartShares AU Resources [via XME]",  # SPDR Metals & Mining ETF — closely tracks ASX resources
-    "DVY":  "SmartShares AU Dividend [via DVY]",   # iShares Dividend Select ETF — similar dividend focus
+    "VT":   "SmartShares Total World [via VT]",
+    "VWO":  "SmartShares Emerging Markets [via VWO]",
+    "VOO":  "SmartShares US500 [via VOO]",
+    "GLD":  "SmartShares Gold ETF [via GLD]",
+    "XME":  "SmartShares AU Resources [via XME]",
+    "DVY":  "SmartShares AU Dividend [via DVY]",
+    "VUG":  "Vanguard Growth ETF",
+    "SOXX": "iShares Semiconductor ETF",
+    "ARKK": "ARK Innovation ETF",
+    "XBI":  "SPDR S&P Biotech ETF",
+    "EWA":  "iShares MSCI Australia",
+    "VEA":  "Vanguard FTSE Developed Markets",
+    "EWJ":  "iShares MSCI Japan",
+    "EZU":  "iShares MSCI Eurozone",
+    "FXI":  "iShares China Large-Cap",
+    "INDA": "iShares MSCI India",
+    "VNQ":  "Vanguard Real Estate ETF",
+    "TLT":  "iShares 20+ Year Treasury",
+    "WOOD": "iShares Global Timber & Forestry",
+    "IYH":  "iShares US Healthcare ETF",
+    "XLY":  "Consumer Discretionary Select SPDR",
 }

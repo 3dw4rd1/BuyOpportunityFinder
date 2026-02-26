@@ -5,7 +5,7 @@
 # Yahoo Finance blocks requests from cloud servers like GitHub Actions.
 # Alpha Vantage is a proper, free, official API that works reliably everywhere.
 #
-# Free tier limit: 25 requests/day — plenty for our 10 ETFs.
+# Free tier limit: 25 requests/day — all tickers are US-listed.
 # We add a small delay between requests to stay within their rate limits.
 
 import requests
@@ -16,15 +16,6 @@ from config import WATCHLIST
 # Your Alpha Vantage API key — stored as a GitHub Secret called ALPHA_VANTAGE_KEY
 API_KEY = os.environ.get("ALPHA_VANTAGE_KEY", "demo")
 BASE_URL = "https://www.alphavantage.co/query"
-
-# Alpha Vantage uses a different ticker format for non-US exchanges.
-# NZX tickers need the exchange prefix: TWH.NZ → NZE:TWH
-def format_ticker_for_alphavantage(ticker: str) -> str:
-    if ticker.endswith(".NZ"):
-        base = ticker.replace(".NZ", "")
-        return f"NZE:{base}"
-    return ticker  # US tickers (VDE, PHO, etc.) work as-is
-
 
 def fetch_prices():
     """
@@ -43,13 +34,12 @@ def fetch_prices():
     print(f"Fetching prices for {len(WATCHLIST)} ETFs via Alpha Vantage...")
 
     for i, (ticker, name) in enumerate(WATCHLIST.items()):
-        av_ticker = format_ticker_for_alphavantage(ticker)
-        currency = "NZD" if ticker.endswith(".NZ") else "USD"
+        currency = "USD"  # All tickers in WATCHLIST are US-listed
 
         try:
             params = {
                 "function": "TIME_SERIES_DAILY",
-                "symbol": av_ticker,
+                "symbol": ticker,
                 "outputsize": "compact",  # Only fetches last 100 days — faster
                 "apikey": API_KEY,
             }
