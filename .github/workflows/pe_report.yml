@@ -14,7 +14,7 @@ name: Daily P/E Ratio Report
 
 on:
   schedule:
-    - cron: "0 18 * * 1-5"   # 7am NZT (UTC+13) — once daily, Monday-Friday
+    - cron: "0 18 * * 1-5"   # 5am AEDT (UTC+11) — once daily, Monday-Friday
   workflow_dispatch:           # Manual trigger for testing
 
 jobs:
@@ -36,4 +36,5 @@ jobs:
       - name: Run P/E ratio tracker
         env:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TZ: Australia/Melbourne
         run: python main_pe.py
