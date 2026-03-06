@@ -6,7 +6,7 @@
 
 import requests
 from datetime import date
-from config import NTFY_URL, ALERT_THRESHOLD_PCT, PE_ALERT_THRESHOLD
+from config import NTFY_URL, ALERT_THRESHOLD_PCT, PE_ALERT_THRESHOLD, CRYPTO_ALERT_THRESHOLD_PCT
 
 
 def format_message(analysis: dict) -> tuple[str, str]:
@@ -156,6 +156,68 @@ def send_pe_notification(pe_analysis: dict) -> bool:
 
     except requests.exceptions.RequestException as e:
         print(f"❌ Failed to send P/E notification: {e}")
+        return False
+
+
+def send_crypto_notification(analysis: dict) -> bool:
+    """
+    Sends a push notification to Ntfy if any coins moved past the threshold.
+    Returns True if sent successfully, False otherwise.
+    """
+    if not analysis["has_alert"]:
+        print("No coins moved more than the threshold in the last 24h. No notification sent.")
+        return False
+
+    movers = analysis["movers"]
+    today = date.today().strftime("%d %b %Y")
+
+    gains = [m for m in movers if m["pct_change"] > 0]
+    losses = [m for m in movers if m["pct_change"] < 0]
+
+    title_parts = []
+    if gains:
+        title_parts.append(f"{len(gains)} up")
+    if losses:
+        title_parts.append(f"{len(losses)} down")
+
+    title = f"Crypto Alert {today} - " + ", ".join(title_parts)
+
+    lines = [f"24h moves >= {CRYPTO_ALERT_THRESHOLD_PCT}% detected:\n"]
+    for m in movers:
+        sign = "+" if m["pct_change"] > 0 else ""
+        lines.append(
+            f"{m['direction']} {m['name']}\n"
+            f"   ${m['prev_close']:,.2f} → ${m['last_close']:,.2f} "
+            f"({sign}{m['pct_change']}%)\n"
+        )
+
+    body = "\n".join(lines)
+
+    print(f"\n--- Crypto Notification Preview ---")
+    print(f"Title: {title}")
+    print(f"Body:\n{body}")
+    print(f"-----------------------------------\n")
+
+    try:
+        response = requests.post(
+            NTFY_URL,
+            data=body.encode("utf-8"),
+            headers={
+                "Title": title,
+                "Priority": "high",
+                "Tags": "bitcoin,chart_with_upwards_trend",
+            },
+        )
+
+        if response.ok:
+            print(f"✅ Crypto notification sent successfully to {NTFY_URL}")
+            return True
+        else:
+            print(f"❌ Ntfy returned status {response.status_code}: {response.text}")
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Failed to send crypto notification: {e}")
         return False
 
 
