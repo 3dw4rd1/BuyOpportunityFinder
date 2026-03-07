@@ -1,0 +1,43 @@
+# =============================================================================
+# CRYPTO TRACKER — GitHub Actions Workflow
+# =============================================================================
+# Runs daily (including weekends — crypto never sleeps).
+#
+# NZ Standard Time (NZST) = UTC+12  → 6am = 18:00 UTC
+# NZ Daylight Time (NZDT) = UTC+13  → 6am = 17:00 UTC
+#
+# We use 17:00 UTC to ensure it always runs by 6am NZT.
+
+name: Daily Crypto Report
+
+on:
+  schedule:
+    - cron: "0 17 * * *"   # 6am NZT — daily check, 7 days a week
+  workflow_dispatch:         # Lets you trigger it manually for testing
+
+jobs:
+  run-crypto-tracker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out your code from GitHub
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Step 3: Install dependencies (crypto only needs requests — no yfinance/pandas)
+      - name: Install dependencies
+        run: pip install -r requirements-crypto.txt
+
+      # Step 4: Run the crypto tracker!
+      # NTFY_TOPIC is stored in GitHub Secrets — no API key needed for CoinGecko.
+      - name: Run crypto tracker
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          TZ: Australia/Melbourne
+        run: python main_crypto.py

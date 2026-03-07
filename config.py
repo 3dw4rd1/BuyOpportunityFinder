@@ -46,6 +46,22 @@ PE_WATCHLIST = {
     "XLY":  "Consumer Discretionary Select SPDR",
 }
 
+# --- Crypto alert threshold ---
+# A notification will only be sent if at least one coin moves by this amount.
+CRYPTO_ALERT_THRESHOLD_PCT = 5.0
+
+# --- Crypto watchlist ---
+# Format: "COINGECKO_ID": "Friendly name"
+# CoinGecko IDs: https://www.coingecko.com/en/coins/all
+CRYPTO_WATCHLIST = {
+    "bitcoin":  "Bitcoin (BTC)",
+    "ethereum": "Ethereum (ETH)",
+    "monero":   "Monero (XMR)",
+    "solana":   "Solana (SOL)",
+    "ripple":   "XRP (XRP)",
+    "dogecoin": "Dogecoin (DOGE)",
+}
+
 # --- Your ETF watchlist ---
 # Format: "TICKER": "Friendly name you want to see in notifications"
 #
